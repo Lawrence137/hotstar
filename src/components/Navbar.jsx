@@ -20,7 +20,7 @@ const Navbar = () => {
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all ${
-        scrolled ? "bg-blue-900/90 backdrop-blur-md shadow-lg" : "bg-transparent"
+        scrolled ? "bg-gradient-to-r from-black via-red-900/90 to-black backdrop-blur-md shadow-lg" : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4 text-white">
@@ -35,7 +35,7 @@ const Navbar = () => {
           <Link to="/" className="hover:text-yellow-400 transition">Home</Link>
           <Link to="/matches" className="hover:text-yellow-400 transition">Matches</Link>
           <Link to="/gallery" className="hover:text-yellow-400 transition">Gallery</Link>
-          <Link to="/shop" className="hover:text-yellow-400 transition">Shop</Link>
+          <Link to="/marketplace" className="hover:text-yellow-400 transition">Marketplace</Link>
           <Link to="/blog" className="hover:text-yellow-400 transition">Blog</Link>
           <Link to="/about" className="hover:text-yellow-400 transition">About</Link>
         </nav>
@@ -59,24 +59,75 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      {isOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-md text-white flex flex-col items-center gap-4 py-6 font-medium">
-          <Link to="/" onClick={() => setIsOpen(false)}>Home</Link>
-          <Link to="/matches" onClick={() => setIsOpen(false)}>Matches</Link>
-          <Link to="/gallery" onClick={() => setIsOpen(false)}>Gallery</Link>
-          <Link to="/shop" onClick={() => setIsOpen(false)}>Shop</Link>
-          <Link to="/blog" onClick={() => setIsOpen(false)}>Blog</Link>
-          <Link to="/about" onClick={() => setIsOpen(false)}>About</Link>
-          <Link
-            to="/join"
-            className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-semibold hover:bg-yellow-400 transition"
-            onClick={() => setIsOpen(false)}
-          >
-            Join Fan Club
-          </Link>
-        </div>
-      )}
+        {/* Mobile Menu Dropdown */}
+        {isOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-gradient-to-b from-black via-red-900/95 to-black backdrop-blur-md shadow-2xl border-t border-red-500/30">
+            <div className="px-6 py-8">
+              {/* Mobile Menu Items */}
+              <div className="flex flex-col space-y-4 mb-8">
+                <Link 
+                  to="/" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">Home</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+                <Link 
+                  to="/matches" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">Matches</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+                <Link 
+                  to="/gallery" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">Gallery</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+                <Link 
+                  to="/marketplace" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">Marketplace</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+                <Link 
+                  to="/blog" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">Blog</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+                <Link 
+                  to="/about" 
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center text-white hover:text-yellow-400 transition-all duration-300 py-3 px-4 rounded-lg hover:bg-red-900/30"
+                >
+                  <span className="text-lg font-medium">About</span>
+                  <div className="ml-auto w-0 group-hover:w-8 h-0.5 bg-yellow-400 transition-all duration-300"></div>
+                </Link>
+              </div>
+              
+              {/* Mobile CTA Button */}
+              <div className="pt-4 border-t border-red-500/30">
+                <Link
+                  to="/join"
+                  className="block w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black px-6 py-4 rounded-xl font-bold text-lg text-center hover:from-yellow-400 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Join Fan Club
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
     </header>
   );
 };

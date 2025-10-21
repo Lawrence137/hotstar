@@ -1,5 +1,6 @@
 import "./App.css";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Matches from "./pages/Matches";
@@ -11,7 +12,7 @@ import Contact from "./pages/Contact";
 
 function App() {
   return (
-    <>
+    <div className="w-full min-h-screen">
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -22,7 +23,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
-    </>
+      <Footer />
+    </div>
   );
 }
 
