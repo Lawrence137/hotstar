@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <img 
-                src="/src/assets/Logo.jpg" 
+                src="/Logo.jpg" 
                 alt="Hotstar FC Logo" 
                 className="h-12 w-12 rounded-full border-2 border-yellow-500"
               />

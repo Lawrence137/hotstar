@@ -8,18 +8,18 @@ const Home = () => {
   
   // Team images data
   const teamImages = [
-    { id: 1, src: "/src/assets/Image1.jpg", alt: "Team Training" },
-    { id: 2, src: "/src/assets/Image2.jpg", alt: "Match Action" },
-    { id: 3, src: "/src/assets/Image3.jpg", alt: "Team Celebration" },
-    { id: 4, src: "/src/assets/Image4.jpg", alt: "Stadium Atmosphere" },
-    { id: 5, src: "/src/assets/Image5.jpg", alt: "Championship Moment" },
-    { id: 6, src: "/src/assets/Image6.jpg", alt: "Team Victory" },
-    { id: 7, src: "/src/assets/Image7.jpg", alt: "Training Session" },
-    { id: 8, src: "/src/assets/Image8.jpg", alt: "Match Day" },
-    { id: 9, src: "/src/assets/Image9.jpg", alt: "Team Spirit" },
-    { id: 10, src: "/src/assets/Image10.jpg", alt: "Championship Glory" },
-    { id: 11, src: "/src/assets/Image11.jpg", alt: "Fan Support" },
-    { id: 12, src: "/src/assets/Image12.jpg", alt: "Team Unity" }
+    { id: 1, src: "/Image1.jpg", alt: "Team Training" },
+    { id: 2, src: "/Image2.jpg", alt: "Match Action" },
+    { id: 3, src: "/Image3.jpg", alt: "Team Celebration" },
+    { id: 4, src: "/Image4.jpg", alt: "Stadium Atmosphere" },
+    { id: 5, src: "/Image5.jpg", alt: "Championship Moment" },
+    { id: 6, src: "/Image6.jpg", alt: "Team Victory" },
+    { id: 7, src: "/Image7.jpg", alt: "Training Session" },
+    { id: 8, src: "/Image8.jpg", alt: "Match Day" },
+    { id: 9, src: "/Image9.jpg", alt: "Team Spirit" },
+    { id: 10, src: "/Image10.jpg", alt: "Championship Glory" },
+    { id: 11, src: "/Image11.jpg", alt: "Fan Support" },
+    { id: 12, src: "/Image12.jpg", alt: "Team Unity" }
   ];
 
   // Auto-advance slideshow
@@ -63,7 +63,7 @@ const Home = () => {
             <div className="mb-12 flex justify-center">
               <div className="relative">
                 <img 
-                  src="/src/assets/Logo.jpg" 
+                  src="/Logo.jpg" 
                   alt="Hotstar FC Logo" 
                   className="h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 rounded-full border-4 border-yellow-500 shadow-2xl shadow-yellow-500/25 hover:scale-105 transition-transform duration-300"
                 />

@@ -26,7 +26,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4 text-white">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Hotstar FC" className="h-10 w-10 rounded-full" />
+          <img src="/Logo.jpg" alt="Hotstar FC" className="h-10 w-10 rounded-full" />
           <span className="text-xl font-bold tracking-wide">Hotstar FC</span>
         </Link>
 
