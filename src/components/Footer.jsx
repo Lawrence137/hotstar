@@ -120,8 +120,8 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-gray-400 text-sm sm:text-base">123 Football Street</p>
-                  <p className="text-gray-400 text-sm sm:text-base">Sports City, SC 12345</p>
+                  <p className="text-gray-400 text-sm sm:text-base">Wangige</p>
+                  <p className="text-gray-400 text-sm sm:text-base">Wangige, Kiambu, Kenya</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -132,7 +132,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 flex-shrink-0" />
-                <p className="text-gray-400 text-sm sm:text-base break-all">info@hotstarfc.com</p>
+                <p className="text-gray-400 text-sm sm:text-base break-all">wangigehotstar@gmail.com</p>
               </div>
             </div>
             
