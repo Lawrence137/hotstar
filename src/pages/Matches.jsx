@@ -1,17 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Trophy, Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import MatchCard from '../components/MatchCard';
-import { previousMatches, upcomingMatches } from '../data/matches';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Matches = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [previousMatches, setPreviousMatches] = useState([]);
+  const [upcomingMatches, setUpcomingMatches] = useState([]);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      const querySnapshot = await getDocs(collection(db, 'matches'));
+      const matchesData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      
+      const now = new Date();
+      const upcoming = [];
+      const previous = [];
+
+      matchesData.forEach(match => {
+        const matchDate = new Date(match.date);
+        if (matchDate >= now) {
+          upcoming.push(match);
+        } else {
+          previous.push(match);
+        }
+      });
+
+      setUpcomingMatches(upcoming);
+      setPreviousMatches(previous);
+    };
+
+    fetchMatches();
+  }, []);
+
+  const getResultBasedOnScore = (result) => {
+    if (!result) return 'D';
+    const scores = result.split('-').map(Number);
+    if (scores[0] > scores[1]) return 'W';
+    if (scores[0] < scores[1]) return 'L';
+    return 'D';
+  }
 
   const stats = {
     totalMatches: previousMatches.length,
-    wins: previousMatches.filter(m => m.result === 'W').length,
-    draws: previousMatches.filter(m => m.result === 'D').length,
-    losses: previousMatches.filter(m => m.result === 'L').length,
-    winRate: Math.round((previousMatches.filter(m => m.result === 'W').length / previousMatches.length) * 100)
+    wins: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'W').length,
+    draws: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'D').length,
+    losses: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'L').length,
+    winRate: previousMatches.length > 0 ? Math.round((previousMatches.filter(m => getResultBasedOnScore(m.result) === 'W').length / previousMatches.length) * 100) : 0
   };
 
   return (

@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, Calendar, User, Tag } from 'lucide-react';
-import { blogPosts } from '../data/blogs';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredPosts, setFilteredPosts] = useState(blogPosts);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const querySnapshot = await getDocs(collection(db, 'blogs'));
+      const blogsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        date: doc.data().createdAt.toDate().toISOString(),
+      }));
+      setBlogPosts(blogsData);
+      setFilteredPosts(blogsData);
+    };
+
+    fetchBlogs();
+  }, []);
 
   const featuredPost = blogPosts.find(post => post.featured);
   const regularPosts = blogPosts.filter(post => !post.featured);
 
-  const categories = ['All', ...new Set(blogPosts.map(post => post.category))];
+  const categories = ['All', ...new Set(blogPosts.map(post => post.category).filter(Boolean))];
 
   useEffect(() => {
     let posts = regularPosts;
@@ -23,14 +40,15 @@ const Blog = () => {
     if (searchTerm) {
       posts = posts.filter(post => 
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+        (post.excerpt && post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
     setFilteredPosts(posts);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, blogPosts]);
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
@@ -59,7 +77,7 @@ const Blog = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center bg-gradient-to-r from-gray-900 to-black p-8 rounded-2xl border border-gray-800">
               <div className="relative h-96 rounded-lg overflow-hidden">
-                <img src={featuredPost.image} alt={featuredPost.title} className="w-full h-full object-cover" />
+                <img src={featuredPost.imageUrl} alt={featuredPost.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute top-4 left-4">
                     <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
@@ -119,7 +137,7 @@ const Blog = () => {
             {filteredPosts.map(post => (
               <div key={post.id} className="group bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden border border-gray-800 hover:border-yellow-500/50 transition-all duration-300 hover:transform hover:scale-105">
                 <div className="relative h-56 overflow-hidden">
-                  <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 </div>
                 <div className="p-6">

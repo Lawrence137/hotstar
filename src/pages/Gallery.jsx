@@ -1,134 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, X, ChevronLeft, ChevronRight, Play, Heart, Share2, Download, Eye } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredImages, setFilteredImages] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  // Gallery images data with categories and descriptions
-  const galleryImages = [
-    { 
-      id: 1, 
-      src: "/Image1.jpg", 
-      alt: "Team Training Session", 
-      category: "training",
-      title: "Intensive Training",
-      description: "Our players during an intense training session, preparing for the upcoming championship.",
-      date: "2024-01-15"
-    },
-    { 
-      id: 2, 
-      src: "/Image2.jpg", 
-      alt: "Match Action Shot", 
-      category: "matches",
-      title: "Championship Moment",
-      description: "A crucial moment during our recent championship match that led to victory.",
-      date: "2024-01-10"
-    },
-    { 
-      id: 3, 
-      src: "/Image3.jpg", 
-      alt: "Team Celebration", 
-      category: "celebration",
-      title: "Victory Celebration",
-      description: "The team celebrating their hard-fought victory with fans and supporters.",
-      date: "2024-01-08"
-    },
-    { 
-      id: 4, 
-      src: "/Image4.jpg", 
-      alt: "Stadium Atmosphere", 
-      category: "stadium",
-      title: "Electric Atmosphere",
-      description: "The incredible atmosphere at Hotstar Stadium during a packed match day.",
-      date: "2024-01-05"
-    },
-    { 
-      id: 5, 
-      src: "/Image5.jpg", 
-      alt: "Championship Glory", 
-      category: "trophy",
-      title: "Trophy Presentation",
-      description: "The moment of glory as our captain lifts the championship trophy.",
-      date: "2024-01-01"
-    },
-    { 
-      id: 6, 
-      src: "/Image6.jpg", 
-      alt: "Team Victory", 
-      category: "celebration",
-      title: "Team Unity",
-      description: "The team showing unity and determination after a crucial win.",
-      date: "2023-12-28"
-    },
-    { 
-      id: 7, 
-      src: "/Image7.jpg", 
-      alt: "Training Session", 
-      category: "training",
-      title: "Morning Training",
-      description: "Early morning training session showing dedication and commitment.",
-      date: "2023-12-25"
-    },
-    { 
-      id: 8, 
-      src: "/Image8.jpg", 
-      alt: "Match Day", 
-      category: "matches",
-      title: "Match Day Preparation",
-      description: "Players preparing for the big match with focus and determination.",
-      date: "2023-12-22"
-    },
-    { 
-      id: 9, 
-      src: "/Image9.jpg", 
-      alt: "Team Spirit", 
-      category: "team",
-      title: "Team Spirit",
-      description: "The unbreakable bond and spirit that defines Hotstar FC.",
-      date: "2023-12-20"
-    },
-    { 
-      id: 10, 
-      src: "/Image10.jpg", 
-      alt: "Championship Glory", 
-      category: "trophy",
-      title: "Championship Victory",
-      description: "Another angle of our championship victory celebration.",
-      date: "2023-12-18"
-    },
-    { 
-      id: 11, 
-      src: "/Image11.jpg", 
-      alt: "Fan Support", 
-      category: "fans",
-      title: "Fan Support",
-      description: "Our incredible fans showing unwavering support throughout the season.",
-      date: "2023-12-15"
-    },
-    { 
-      id: 12, 
-      src: "/Image12.jpg", 
-      alt: "Team Unity", 
-      category: "team",
-      title: "Team Bonding",
-      description: "Team bonding moments that strengthen our unity and performance.",
-      date: "2023-12-12"
-    }
-  ];
+  useEffect(() => {
+    const fetchGallery = async () => {
+      const querySnapshot = await getDocs(collection(db, 'gallery'));
+      const galleryData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        src: doc.data().imageUrl,
+        ...doc.data(),
+      }));
+      setGalleryImages(galleryData);
+    };
 
-  const categories = [
-    { id: 'all', name: 'All Photos', count: galleryImages.length },
-    { id: 'matches', name: 'Matches', count: galleryImages.filter(img => img.category === 'matches').length },
-    { id: 'training', name: 'Training', count: galleryImages.filter(img => img.category === 'training').length },
-    { id: 'celebration', name: 'Celebrations', count: galleryImages.filter(img => img.category === 'celebration').length },
-    { id: 'trophy', name: 'Trophies', count: galleryImages.filter(img => img.category === 'trophy').length },
-    { id: 'team', name: 'Team', count: galleryImages.filter(img => img.category === 'team').length },
-    { id: 'fans', name: 'Fans', count: galleryImages.filter(img => img.category === 'fans').length },
-    { id: 'stadium', name: 'Stadium', count: galleryImages.filter(img => img.category === 'stadium').length }
-  ];
+    fetchGallery();
+  }, []);
 
   // Filter images based on search term and category
   useEffect(() => {
@@ -140,14 +35,36 @@ const Gallery = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(img => 
-        img.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        img.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        img.alt.toLowerCase().includes(searchTerm.toLowerCase())
+        (img.title && img.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (img.description && img.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (img.alt && img.alt.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
     setFilteredImages(filtered);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, galleryImages]);
+
+  useEffect(() => {
+    if (galleryImages.length > 0) {
+      const allCategories = galleryImages.reduce((acc, img) => {
+        if (img.category && !acc.includes(img.category)) {
+          acc.push(img.category);
+        }
+        return acc;
+      }, []);
+
+      const categoryCounts = allCategories.map(category => ({
+        id: category,
+        name: category.charAt(0).toUpperCase() + category.slice(1),
+        count: galleryImages.filter(p => p.category === category).length
+      }));
+
+      setCategories([
+        { id: 'all', name: 'All Photos', count: galleryImages.length },
+        ...categoryCounts
+      ]);
+    }
+  }, [galleryImages]);
 
   const openModal = (image) => {
     setSelectedImage(image);
@@ -173,6 +90,7 @@ const Gallery = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ShoppingCart, Phone, CreditCard, Smartphone, Star, Heart, Eye, Plus, Minus, X, Check, Truck, Shield, Clock } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Marketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -16,156 +18,22 @@ const Marketplace = () => {
     paymentMethod: 'cod',
     items: []
   });
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // Product data with detailed information
-  const products = [
-    {
-      id: 1,
-      name: "Home Jersey 2024",
-      price: 8999,
-      originalPrice: 10999,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      category: "jerseys",
-      description: "Official Hotstar FC home jersey for the 2024 season. Made with premium materials for comfort and durability.",
-      features: ["100% Polyester", "Moisture-wicking", "Official team colors", "Player name & number available"],
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Red", "Yellow"],
-      inStock: true,
-      rating: 4.8,
-      reviews: 124,
-      featured: true,
-      bestseller: true
-    },
-    {
-      id: 2,
-      name: "Away Jersey 2024",
-      price: 8999,
-      originalPrice: 10999,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      category: "jerseys",
-      description: "Official Hotstar FC away jersey featuring our signature design and team colors.",
-      features: ["100% Polyester", "Moisture-wicking", "Official team colors", "Player name & number available"],
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["White", "Black"],
-      inStock: true,
-      rating: 4.7,
-      reviews: 98,
-      featured: true,
-      bestseller: false
-    },
-    {
-      id: 3,
-      name: "Team Scarf",
-      price: 2499,
-      originalPrice: 2999,
-      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop",
-      category: "accessories",
-      description: "Show your support with our official team scarf. Perfect for match days and cold weather.",
-      features: ["100% Acrylic", "Team colors", "Fringed edges", "One size fits all"],
-      sizes: ["One Size"],
-      colors: ["Red/Yellow", "Black/White"],
-      inStock: true,
-      rating: 4.6,
-      reviews: 87,
-      featured: false,
-      bestseller: true
-    },
-    {
-      id: 4,
-      name: "Team Cap",
-      price: 3499,
-      originalPrice: 3999,
-      image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&h=400&fit=crop",
-      category: "accessories",
-      description: "Official Hotstar FC cap with embroidered logo. Adjustable fit for all head sizes.",
-      features: ["100% Cotton", "Adjustable strap", "Embroidered logo", "UV protection"],
-      sizes: ["One Size"],
-      colors: ["Red", "Black", "White"],
-      inStock: true,
-      rating: 4.5,
-      reviews: 76,
-      featured: false,
-      bestseller: false
-    },
-    {
-      id: 5,
-      name: "Training Kit",
-      price: 6999,
-      originalPrice: 7999,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-      category: "training",
-      description: "Complete training kit including jersey and shorts. Perfect for workouts and training sessions.",
-      features: ["Moisture-wicking fabric", "Comfortable fit", "Team colors", "Durable construction"],
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Red", "Black"],
-      inStock: true,
-      rating: 4.7,
-      reviews: 92,
-      featured: true,
-      bestseller: false
-    },
-    {
-      id: 6,
-      name: "Team Mug",
-      price: 1999,
-      originalPrice: 2499,
-      image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?w=400&h=400&fit=crop",
-      category: "accessories",
-      description: "Ceramic mug with official Hotstar FC logo. Perfect for your morning coffee or tea.",
-      features: ["Ceramic material", "Dishwasher safe", "11oz capacity", "Official logo"],
-      sizes: ["One Size"],
-      colors: ["White", "Black"],
-      inStock: true,
-      rating: 4.4,
-      reviews: 65,
-      featured: false,
-      bestseller: false
-    },
-    {
-      id: 7,
-      name: "Team Hoodie",
-      price: 12999,
-      originalPrice: 14999,
-      image: "https://images.unsplash.com/photo-1556821840-3a63f95609a4?w=400&h=400&fit=crop",
-      category: "apparel",
-      description: "Comfortable hoodie with team logo and colors. Perfect for casual wear and match days.",
-      features: ["80% Cotton, 20% Polyester", "Kangaroo pocket", "Drawstring hood", "Team logo"],
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Red", "Black", "Gray"],
-      inStock: true,
-      rating: 4.6,
-      reviews: 78,
-      featured: true,
-      bestseller: true
-    },
-    {
-      id: 8,
-      name: "Team Keychain",
-      price: 999,
-      originalPrice: 1299,
-      image: "https://images.unsplash.com/photo-1601762603339-fd61e28b698a?w=400&h=400&fit=crop",
-      category: "accessories",
-      description: "Metal keychain with team logo. A small way to show your support everywhere you go.",
-      features: ["Metal construction", "Team logo", "Key ring included", "Durable"],
-      sizes: ["One Size"],
-      colors: ["Gold", "Silver"],
-      inStock: true,
-      rating: 4.3,
-      reviews: 43,
-      featured: false,
-      bestseller: false
-    }
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      const productsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setProducts(productsData);
+    };
 
-  const categories = [
-    { id: 'all', name: 'All Products', count: products.length },
-    { id: 'jerseys', name: 'Jerseys', count: products.filter(p => p.category === 'jerseys').length },
-    { id: 'accessories', name: 'Accessories', count: products.filter(p => p.category === 'accessories').length },
-    { id: 'training', name: 'Training', count: products.filter(p => p.category === 'training').length },
-    { id: 'apparel', name: 'Apparel', count: products.filter(p => p.category === 'apparel').length }
-  ];
-
-  const [filteredProducts, setFilteredProducts] = useState(products);
+    fetchProducts();
+  }, []);
 
   // Filter and sort products
   useEffect(() => {
@@ -194,14 +62,36 @@ const Marketplace = () => {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       case 'featured':
-        filtered.sort((a, b) => b.featured - a.featured);
+        filtered.sort((a, b) => (b.featured || false) - (a.featured || false));
         break;
       default:
         break;
     }
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, searchTerm, sortBy]);
+  }, [selectedCategory, searchTerm, sortBy, products]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const allCategories = products.reduce((acc, product) => {
+        if (product.category && !acc.includes(product.category)) {
+          acc.push(product.category);
+        }
+        return acc;
+      }, []);
+
+      const categoryCounts = allCategories.map(category => ({
+        id: category,
+        name: category.charAt(0).toUpperCase() + category.slice(1),
+        count: products.filter(p => p.category === category).length
+      }));
+
+      setCategories([
+        { id: 'all', name: 'All Products', count: products.length },
+        ...categoryCounts
+      ]);
+    }
+  }, [products]);
 
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
@@ -212,7 +102,7 @@ const Marketplace = () => {
           : item
       ));
     } else {
-      setCart([...cart, { ...product, quantity: 1, selectedSize: product.sizes[0], selectedColor: product.colors[0] }]);
+      setCart([...cart, { ...product, quantity: 1, selectedSize: product.sizes?.[0], selectedColor: product.colors?.[0] }]);
     }
   };
 
@@ -352,7 +242,7 @@ const Marketplace = () => {
               {/* Product Image */}
               <div className="relative overflow-hidden">
                 <img
-                  src={product.image}
+                  src={product.imageUrl}
                   alt={product.name}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -398,8 +288,8 @@ const Marketplace = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-sm text-gray-400">{product.rating}</span>
-                    <span className="text-sm text-gray-500">({product.reviews})</span>
+                    <span className="text-sm text-gray-400">{product.rating || 0}</span>
+                    <span className="text-sm text-gray-500">({product.reviews || 0})</span>
                   </div>
                 </div>
 
@@ -467,7 +357,7 @@ const Marketplace = () => {
                     {cart.map((item) => (
                       <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-800 rounded-xl">
                         <img
-                          src={item.image}
+                          src={item.imageUrl}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
@@ -546,7 +436,7 @@ const Marketplace = () => {
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-1/2">
                   <img
-                    src={selectedProduct.image}
+                    src={selectedProduct.imageUrl}
                     alt={selectedProduct.name}
                     className="w-full h-96 lg:h-full object-cover"
                   />
@@ -555,8 +445,8 @@ const Marketplace = () => {
                   <div className="flex items-center gap-2 mb-4">
                     <div className="flex items-center gap-1">
                       <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                      <span className="text-lg text-gray-400">{selectedProduct.rating}</span>
-                      <span className="text-gray-500">({selectedProduct.reviews} reviews)</span>
+                      <span className="text-lg text-gray-400">{selectedProduct.rating || 0}</span>
+                      <span className="text-gray-500">({selectedProduct.reviews || 0} reviews)</span>
                     </div>
                   </div>
 
@@ -579,7 +469,7 @@ const Marketplace = () => {
                     <div>
                       <h3 className="font-semibold text-white mb-2">Features:</h3>
                       <ul className="space-y-1">
-                        {selectedProduct.features.map((feature, index) => (
+                        {(selectedProduct.features || []).map((feature, index) => (
                           <li key={index} className="text-gray-400 flex items-center gap-2">
                             <Check className="w-4 h-4 text-green-500" />
                             {feature}
@@ -591,7 +481,7 @@ const Marketplace = () => {
                     <div>
                       <h3 className="font-semibold text-white mb-2">Available Sizes:</h3>
                       <div className="flex gap-2">
-                        {selectedProduct.sizes.map((size) => (
+                        {(selectedProduct.sizes || []).map((size) => (
                           <span key={size} className="px-3 py-1 bg-gray-800 text-white rounded-lg text-sm">
                             {size}
                           </span>
@@ -602,7 +492,7 @@ const Marketplace = () => {
                     <div>
                       <h3 className="font-semibold text-white mb-2">Available Colors:</h3>
                       <div className="flex gap-2">
-                        {selectedProduct.colors.map((color) => (
+                        {(selectedProduct.colors || []).map((color) => (
                           <span key={color} className="px-3 py-1 bg-gray-800 text-white rounded-lg text-sm">
                             {color}
                           </span>

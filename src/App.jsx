@@ -9,21 +9,34 @@ import Blog from "./pages/Blog";
 import Marketplace from "./pages/Marketplace";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Admin from "./admin/Admin";
+import CloudinaryUpload from "./components/CloudinaryUpload"; // Import CloudinaryUpload
 
 function App() {
   return (
     <div className="w-full min-h-screen">
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/matches" element={<Matches />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/*"
+          element={
+            <>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/matches" element={<Matches />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/upload" element={<CloudinaryUpload />} /> {/* Add a route for the uploader */}
+              </Routes>
+              <Footer />
+            </>
+          }
+        />
+        <Route path="/admin/*" element={<Admin />} />
       </Routes>
-      <Footer />
     </div>
   );
 }
