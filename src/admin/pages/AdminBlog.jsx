@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 
 const AdminBlog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -10,6 +9,9 @@ const AdminBlog = () => {
   const [author, setAuthor] = useState('');
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const fetchBlogs = async () => {
     const querySnapshot = await getDocs(collection(db, 'blogs'));
@@ -30,10 +32,34 @@ const AdminBlog = () => {
 
     let imageUrl = '';
     if (image) {
+      if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+        alert('Cloudinary credentials are not set in environment variables.');
+        setUploading(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', image);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
       try {
-        const storageRef = ref(storage, `blogs/${image.name}`);
-        await uploadBytes(storageRef, image);
-        imageUrl = await getDownloadURL(storageRef);
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        const data = await response.json();
+        if (response.ok) {
+          imageUrl = data.secure_url;
+        } else {
+          console.error('Cloudinary upload error:', data);
+          alert(data.error ? data.error.message : 'Upload failed.');
+          setUploading(false);
+          return;
+        }
       } catch (error) {
         console.error('Error uploading image: ', error);
         setUploading(false);
@@ -54,6 +80,7 @@ const AdminBlog = () => {
       setContent('');
       setAuthor('');
       setImage(null);
+      document.getElementById('image-input-blog').value = '';
       fetchBlogs();
     } catch (error) {
       console.error('Error adding blog: ', error);
@@ -65,6 +92,7 @@ const AdminBlog = () => {
   const handleDeleteBlog = async (id) => {
     try {
       await deleteDoc(doc(db, 'blogs', id));
+      // Note: Deleting from Cloudinary requires backend authentication and is not handled here.
       fetchBlogs();
     } catch (error) {
       console.error('Error deleting blog: ', error);
@@ -111,6 +139,7 @@ const AdminBlog = () => {
           <div>
             <label className="block">Image</label>
             <input
+              id="image-input-blog"
               type="file"
               onChange={(e) => setImage(e.target.files[0])}
               className="w-full p-2 border"
