@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 
 const AdminMarketplace = () => {
   const [products, setProducts] = useState([]);
@@ -9,6 +8,10 @@ const AdminMarketplace = () => {
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const fetchProducts = async () => {
     const querySnapshot = await getDocs(collection(db, 'products'));
@@ -30,34 +33,61 @@ const AdminMarketplace = () => {
       return;
     }
 
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      alert('Cloudinary credentials are not set in environment variables.');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', image);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
     try {
-      // Upload image to Firebase Storage
-      const storageRef = ref(storage, `products/${image.name}`);
-      await uploadBytes(storageRef, image);
-      const imageUrl = await getDownloadURL(storageRef);
+      // Upload image to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
-      // Add product to Firestore
-      await addDoc(collection(db, 'products'), {
-        name,
-        price: parseFloat(price),
-        description,
-        imageUrl,
-      });
+      const data = await response.json();
 
-      // Clear form
-      setName('');
-      setPrice('');
-      setDescription('');
-      setImage(null);
-      fetchProducts();
+      if (response.ok) {
+        const imageUrl = data.secure_url;
+
+        // Add product to Firestore
+        await addDoc(collection(db, 'products'), {
+          name,
+          price: parseFloat(price),
+          description,
+          imageUrl,
+        });
+
+        // Clear form
+        setName('');
+        setPrice('');
+        setDescription('');
+        setImage(null);
+        document.getElementById('image-input').value = '';
+        fetchProducts();
+      } else {
+        console.error('Cloudinary upload error:', data);
+        alert(data.error ? data.error.message : 'Upload failed.');
+      }
     } catch (error) {
       console.error('Error adding product: ', error);
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleDeleteProduct = async (id) => {
     try {
       await deleteDoc(doc(db, 'products', id));
+      // Note: Deleting from Cloudinary requires backend authentication and is not handled here.
       fetchProducts();
     } catch (error) {
       console.error('Error deleting product: ', error);
@@ -103,6 +133,7 @@ const AdminMarketplace = () => {
           <div>
             <label className="block">Image</label>
             <input
+              id="image-input"
               type="file"
               onChange={(e) => setImage(e.target.files[0])}
               className="w-full p-2 border"
@@ -112,8 +143,9 @@ const AdminMarketplace = () => {
           <button
             type="submit"
             className="bg-blue-500 text-white p-2 rounded"
+            disabled={uploading}
           >
-            Add Product
+            {uploading ? 'Uploading...' : 'Add Product'}
           </button>
         </form>
       </div>
