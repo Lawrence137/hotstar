@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 
 const AdminGallery = () => {
   const [gallery, setGallery] = useState([]);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const fetchGallery = async () => {
     const querySnapshot = await getDocs(collection(db, 'gallery'));
@@ -33,20 +35,41 @@ const AdminGallery = () => {
       alert('Please select an image to upload.');
       return;
     }
+
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      alert('Cloudinary credentials are not set in environment variables.');
+      return;
+    }
+
     setUploading(true);
+    const formData = new FormData();
+    formData.append('file', image);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
     try {
-      const storageRef = ref(storage, `gallery/${image.name}`);
-      await uploadBytes(storageRef, image);
-      const imageUrl = await getDownloadURL(storageRef);
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
-      await addDoc(collection(db, 'gallery'), {
-        imageUrl,
-        storagePath: storageRef.fullPath,
-        createdAt: new Date(),
-      });
+      const data = await response.json();
 
-      setImage(null);
-      fetchGallery();
+      if (response.ok) {
+        const imageUrl = data.secure_url;
+        await addDoc(collection(db, 'gallery'), {
+          imageUrl,
+          createdAt: new Date(),
+        });
+
+        setImage(null);
+        fetchGallery();
+      } else {
+        console.error('Cloudinary upload error:', data);
+        alert(data.error ? data.error.message : 'Upload failed.');
+      }
     } catch (error) {
       console.error('Error uploading image: ', error);
     } finally {
@@ -54,14 +77,13 @@ const AdminGallery = () => {
     }
   };
 
-  const handleDelete = async (id, storagePath) => {
+  const handleDelete = async (id) => {
     try {
       // Delete from Firestore
       await deleteDoc(doc(db, 'gallery', id));
 
-      // Delete from Storage
-      const storageRef = ref(storage, storagePath);
-      await deleteObject(storageRef);
+      // Note: Deleting from Cloudinary requires backend authentication and is not handled here.
+      // The image file will remain in Cloudinary.
 
       fetchGallery();
     } catch (error) {
@@ -107,7 +129,7 @@ const AdminGallery = () => {
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={() => handleDelete(item.id, item.storagePath)}
+                  onClick={() => handleDelete(item.id)}
                   className="bg-red-500 text-white p-2 rounded-full"
                 >
                   Delete
