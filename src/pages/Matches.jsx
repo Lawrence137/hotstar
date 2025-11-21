@@ -37,20 +37,39 @@ const Matches = () => {
     fetchMatches();
   }, []);
 
-  const getResultBasedOnScore = (result) => {
-    if (!result) return 'D';
-    const scores = result.split('-').map(Number);
-    if (scores[0] > scores[1]) return 'W';
-    if (scores[0] < scores[1]) return 'L';
+  const getResultBasedOnScore = (match) => {
+    const homeScore = Number(match.homeScore);
+    const awayScore = Number(match.awayScore);
+
+    if (isNaN(homeScore) || isNaN(awayScore)) {
+      return 'D';
+    }
+
+    const mainTeamIsHome = match.homeTeam?.toLowerCase() === 'hotstar fc' || match.homeTeam?.toLowerCase() === 'wangige hotstar' || match.homeTeam?.toLowerCase() === 'wangige hotstar fc';
+    const mainTeamIsAway = match.awayTeam?.toLowerCase() === 'hotstar fc' || match.awayTeam?.toLowerCase() === 'wangige hotstar' || match.awayTeam?.toLowerCase() === 'wangige hotstar fc';
+
+    if (mainTeamIsHome) {
+      if (homeScore > awayScore) return 'W';
+      if (homeScore < awayScore) return 'L';
+      return 'D';
+    }
+
+    if (mainTeamIsAway) {
+      if (awayScore > homeScore) return 'W';
+      if (awayScore < homeScore) return 'L';
+      return 'D';
+    }
+
+    // Default to draw if the main team isn't in the match
     return 'D';
   }
 
   const stats = {
     totalMatches: previousMatches.length,
-    wins: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'W').length,
-    draws: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'D').length,
-    losses: previousMatches.filter(m => getResultBasedOnScore(m.result) === 'L').length,
-    winRate: previousMatches.length > 0 ? Math.round((previousMatches.filter(m => getResultBasedOnScore(m.result) === 'W').length / previousMatches.length) * 100) : 0
+    wins: previousMatches.filter(m => getResultBasedOnScore(m) === 'W').length,
+    draws: previousMatches.filter(m => getResultBasedOnScore(m) === 'D').length,
+    losses: previousMatches.filter(m => getResultBasedOnScore(m) === 'L').length,
+    winRate: previousMatches.length > 0 ? Math.round((previousMatches.filter(m => getResultBasedOnScore(m) === 'W').length / previousMatches.length) * 100) : 0
   };
 
   return (

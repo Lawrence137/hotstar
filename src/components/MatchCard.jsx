@@ -64,9 +64,15 @@ const MatchCard = ({ match, isUpcoming = false }) => {
 
       {/* Teams and Score */}
       <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          {/* Home Team */}
-          <div className="flex-1 text-center">
+        <div className="flex flex-row items-center justify-center sm:justify-between mb-6"> {/* Main container for the whole scoreline */}
+
+          {/* Home Team & Score Group */}
+          <div className="flex-1 text-center flex flex-col justify-center items-center"> {/* Added flex flex-col justify-center items-center */}
+            {!isUpcoming && ( // Only show home score for past matches
+              <div className="text-3xl font-bold text-white mb-1">
+                {match.homeScore !== undefined ? match.homeScore : 'N/A'}
+              </div>
+            )}
             <div className="text-lg font-bold text-white mb-2">
               {match.homeTeam}
             </div>
@@ -77,22 +83,25 @@ const MatchCard = ({ match, isUpcoming = false }) => {
             )}
           </div>
 
-          {/* VS or Score */}
-          <div className="px-6">
+          {/* Central VS / Full Time */}
+          <div className="px-6 flex flex-col items-center justify-center"> {/* This will always be centered */}
             {isUpcoming ? (
               <div className="text-2xl font-bold text-yellow-500">VS</div>
             ) : (
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">
-                  {match.homeScore !== undefined && match.awayScore !== undefined ? `${match.homeScore} - ${match.awayScore}` : 'N/A'}
-                </div>
+              <>
+                <div className="text-3xl font-bold text-white mb-1"> - </div> {/* This is just the hyphen */}
                 <div className="text-sm text-gray-400">Full Time</div>
-              </div>
+              </>
             )}
           </div>
 
-          {/* Away Team */}
-          <div className="flex-1 text-center">
+          {/* Away Team & Score Group */}
+          <div className="flex-1 text-center flex flex-col justify-center items-center"> {/* Added flex flex-col justify-center items-center */}
+            {!isUpcoming && ( // Only show away score for past matches
+              <div className="text-3xl font-bold text-white mb-1">
+                {match.awayScore !== undefined ? match.awayScore : 'N/A'}
+              </div>
+            )}
             <div className="text-lg font-bold text-white mb-2">
               {match.awayTeam}
             </div>
@@ -102,6 +111,7 @@ const MatchCard = ({ match, isUpcoming = false }) => {
               </div>
             )}
           </div>
+
         </div>
 
         {/* Additional Info */}
