@@ -72,7 +72,7 @@ const Home = () => {
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent leading-tight">
-              HOTSTAR FC
+              WANGIGE HOTSTAR FC
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-10 max-w-4xl mx-auto leading-relaxed px-4">
               Experience the passion, power, and glory of football. Join the most electrifying fan community in the world.

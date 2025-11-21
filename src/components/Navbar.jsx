@@ -27,7 +27,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <img src="/Logo.jpg" alt="Hotstar FC" className="h-10 w-10 rounded-full" />
-          <span className="text-xl font-bold tracking-wide">Hotstar FC</span>
+          <span className="text-xl font-bold tracking-wide">Wangige Hotstar FC</span>
         </Link>
 
         {/* Desktop Menu */}
