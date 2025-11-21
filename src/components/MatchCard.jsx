@@ -84,7 +84,7 @@ const MatchCard = ({ match, isUpcoming = false }) => {
             ) : (
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">
-                  {match.homeScore} - {match.awayScore}
+                  {match.homeScore !== undefined && match.awayScore !== undefined ? `${match.homeScore} - ${match.awayScore}` : 'N/A'}
                 </div>
                 <div className="text-sm text-gray-400">Full Time</div>
               </div>

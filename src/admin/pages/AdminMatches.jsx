@@ -4,11 +4,11 @@ import { db } from '../../firebase';
 
 const AdminMatches = () => {
   const [matches, setMatches] = useState([]);
-  const [opponent, setOpponent] = useState('');
-  const [opponentLogo, setOpponentLogo] = useState('');
+  const [homeTeam, setHomeTeam] = useState('');
+  const [awayTeam, setAwayTeam] = useState('');
+  const [homeScore, setHomeScore] = useState('');
+  const [awayScore, setAwayScore] = useState('');
   const [date, setDate] = useState('');
-  const [homeOrAway, setHomeOrAway] = useState('Home');
-  const [result, setResult] = useState('');
   const [goals, setGoals] = useState([]);
 
   const [goalTime, setGoalTime] = useState('');
@@ -31,22 +31,22 @@ const AdminMatches = () => {
     e.preventDefault();
     try {
       await addDoc(collection(db, 'matches'), {
-        opponent,
-        opponentLogo,
+        homeTeam,
+        awayTeam,
+        homeScore,
+        awayScore,
         date,
-        homeOrAway,
-        result,
+        result: `${homeScore}-${awayScore}`,
         goals,
       });
-      setOpponent('');
-      setOpponentLogo('');
+      setHomeTeam('');
+      setAwayTeam('');
+      setHomeScore('');
+      setAwayScore('');
       setDate('');
-      setHomeOrAway('Home');
-      setResult('');
       setGoals([]);
       fetchMatches();
-    } catch (error) {
-      console.error('Error adding match: ', error);
+          } catch (error) {      console.error('Error adding match: ', error);
     }
   };
 
@@ -75,21 +75,40 @@ const AdminMatches = () => {
         <h2 className="text-xl font-bold mb-3">Add New Match</h2>
         <form onSubmit={handleAddMatch} className="space-y-4">
           <div>
-            <label className="block">Opponent</label>
+            <label className="block">Home Team</label>
             <input
               type="text"
-              value={opponent}
-              onChange={(e) => setOpponent(e.target.value)}
+              value={homeTeam}
+              onChange={(e) => setHomeTeam(e.target.value)}
               className="w-full p-2 border"
               required
             />
           </div>
           <div>
-            <label className="block">Opponent Logo URL</label>
+            <label className="block">Away Team</label>
             <input
               type="text"
-              value={opponentLogo}
-              onChange={(e) => setOpponentLogo(e.target.value)}
+              value={awayTeam}
+              onChange={(e) => setAwayTeam(e.target.value)}
+              className="w-full p-2 border"
+              required
+            />
+          </div>
+          <div>
+            <label className="block">Home Score</label>
+            <input
+              type="number"
+              value={homeScore}
+              onChange={(e) => setHomeScore(e.target.value)}
+              className="w-full p-2 border"
+            />
+          </div>
+          <div>
+            <label className="block">Away Score</label>
+            <input
+              type="number"
+              value={awayScore}
+              onChange={(e) => setAwayScore(e.target.value)}
               className="w-full p-2 border"
             />
           </div>
@@ -101,27 +120,6 @@ const AdminMatches = () => {
               onChange={(e) => setDate(e.target.value)}
               className="w-full p-2 border"
               required
-            />
-          </div>
-          <div>
-            <label className="block">Home/Away</label>
-            <select
-              value={homeOrAway}
-              onChange={(e) => setHomeOrAway(e.target.value)}
-              className="w-full p-2 border"
-            >
-              <option>Home</option>
-              <option>Away</option>
-            </select>
-          </div>
-          <div>
-            <label className="block">Result</label>
-            <input
-              type="text"
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
-              className="w-full p-2 border"
-              placeholder="e.g., 2-1"
             />
           </div>
           <div>
@@ -171,7 +169,8 @@ const AdminMatches = () => {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="border p-2">Opponent</th>
+              <th className="border p-2">Home Team</th>
+              <th className="border p-2">Away Team</th>
               <th className="border p-2">Date</th>
               <th className="border p-2">Result</th>
               <th className="border p-2">Actions</th>
@@ -180,7 +179,8 @@ const AdminMatches = () => {
           <tbody>
             {matches.map((match) => (
               <tr key={match.id}>
-                <td className="border p-2">{match.opponent}</td>
+                <td className="border p-2">{match.homeTeam}</td>
+                <td className="border p-2">{match.awayTeam}</td>
                 <td className="border p-2">{match.date}</td>
                 <td className="border p-2">{match.result}</td>
                 <td className="border p-2">
